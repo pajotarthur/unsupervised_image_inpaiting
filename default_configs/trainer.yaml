@@ -1,0 +1,11 @@
+
+common: &common
+  nepochs: 10
+  niter:
+    train: max
+    val: 10
+
+
+classifier:
+    nepochs: 10
+    <<: *common

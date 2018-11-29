@@ -9,8 +9,7 @@ def get_dataset_by_name(name):
         return MNIST
     elif name == 'fashion_mnist':
         return FashionMNIST
-    else:
-        raise NotImplementedError(name)
+    raise NotImplementedError(name)
 
 
 def init_dataset(config):

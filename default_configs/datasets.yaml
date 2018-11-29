@@ -1,0 +1,11 @@
+---
+common: &common
+    train: True
+    batch_size:  16
+    num_workers: 4
+    shuffle: True
+    drop_last: False
+
+mnist:
+    batch_size : 32
+    <<: *common
