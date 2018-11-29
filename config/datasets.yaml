@@ -1,0 +1,12 @@
+---
+common:  
+    batch_size : 32
+    image_size: 64
+
+mnist: 
+    #<<: *common
+    batch_size:  128
+
+ImageNet: 
+    #<<: *common
+    batch_size:  2

@@ -1,0 +1,24 @@
+
+datasets:
+    train:
+        type: celeba
+        args:
+            im_size: &im_size 64
+            batch_size: &batch_size 22
+    val:
+        type: celeba
+        batch_size: 2
+        # <<: *train
+        # batch_size: 2
+
+modules:
+    gen:
+        type: sagan_generator
+        args:
+            self_attention: True
+    # dis:
+    #     type: sagan_discriminator
+
+
+trainer:
+    type: unsupervised_sr

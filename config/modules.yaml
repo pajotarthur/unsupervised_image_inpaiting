@@ -1,0 +1,36 @@
+
+---
+
+# Generators
+
+common_generator:
+    ngf: 64
+    norm_layer: batch
+    init: normal
+    nz: 30
+    nl_layer: relu
+    dropout: 0
+    upsample: bilinear
+    padding_type: zero
+    cond_type: concat
+    init_gain: 0.02
+
+sagan_generator:
+    # <<: *common_generator
+    self_attention: True
+    ngf: 64
+
+
+# Discriminators
+
+common_discriminator:
+    ndf: 64
+    norm_layer: batch
+    use_sigmoid: True
+    init: normal
+    nl_layer: relu
+    init_gain: 0.02
+
+sagan_discriminator:
+    # <<: *common_discriminator
+    self_attention: True
