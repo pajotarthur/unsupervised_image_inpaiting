@@ -3,10 +3,9 @@ common:
     batch_size : 32
     image_size: 64
 
-mnist: 
-    #<<: *common
-    batch_size:  128
-
-ImageNet: 
-    #<<: *common
-    batch_size:  2
+mnist:
+    train: True
+    batch_size:  16
+    num_workers: 4
+    shuffle: True
+    drop_last: False

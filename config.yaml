@@ -1,24 +1,31 @@
 
-datasets:
-    train:
-        type: celeba
-        args:
-            im_size: &im_size 64
-            batch_size: &batch_size 22
-    val:
-        type: celeba
-        batch_size: 2
-        # <<: *train
-        # batch_size: 2
 
 modules:
-    gen:
-        type: sagan_generator
+    model:
+        name: mnist_classifier
         args:
-            self_attention: True
+            num_classes: 10
+            
     # dis:
-    #     type: sagan_discriminator
+    #     name: sagan_discriminator
 
+datasets:
+    train:
+        name: mnist
+        args:
+            root: '/local/debezenac/data/mnist'
+            train: True
+            download: True
+            batch_size: &batch_size 22
+    test:
+        name: mnist
+        args:
+            root: '/local/debezenac/data/mnist'
+            train: False
+            download: True
+            batch_size: *batch_size
 
 trainer:
-    type: unsupervised_sr
+    name: classifier
+    args:
+        hello: 1
