@@ -10,6 +10,5 @@ def get_module_by_name(name):
 	# 	return partial(init_generator, SaganGenerator)
 	raise NotImplementedError(name)
 
-def init_module(config):
-	name, args = config['name'], config['args']
+def init_module(name, args):
 	return get_module_by_name(name)(**args)

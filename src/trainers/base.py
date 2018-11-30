@@ -14,8 +14,10 @@ class BaseTrainer():
 			for batch in dataset:
 				iter += 1
 				self.forward(batch)
-				bs = batch[list(batch.keys())[0]].shape[0]
-				self.update_metrics(batch_size=bs)
+				bs = len(batch[list(batch.keys())[0]])
+				self.update_metrics(
+					batch_size=bs
+				)
 
 				if (niter[name] != 'max') and (iter > niter):
 					break
