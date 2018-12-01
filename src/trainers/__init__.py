@@ -6,6 +6,5 @@ def get_trainer_by_name(name):
 		return ClassifierTrainer
 	raise NotImplementedError(name)
 
-def init_trainer(modules, datasets, config):
-	name, args = config['name'], config['args']
+def init_trainer(modules, datasets, name, args):
 	return get_trainer_by_name(name)(modules, datasets, args)

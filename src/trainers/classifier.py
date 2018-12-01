@@ -10,8 +10,11 @@ class ClassifierTrainer(BaseTrainer):
 		self.register_metric('loss_val', type='scalar')
 		# self.register_logger() pourquoi pas généraliser metric, aux images, etc?
 		
-	def forward(self):
-		self.loss_train = 
-		self.loss_val = 
+	# def forward(self):
+	# 	self.loss_train = 
+	# 	self.loss_val = 
+
+	def __repr__(self):
+		return str(10)
 			
 
