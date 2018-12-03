@@ -42,6 +42,10 @@ class EpochExperiment(object):
 	def eval(self):
 		self.train(mode=False)
 
+	def to(self, device):
+		for m in self.modules():
+			m.to(device)
+
 	def modules(self):
 		for name, module in self.named_modules():
 			yield module

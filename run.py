@@ -21,7 +21,7 @@ def init_and_run(config, _run=None):
     for module_name, module_config in config['modules'].items():
         modules[module_name] = init_module(**module_config)
 
-    # initializing trainer and running it
+    # initializing experiment and running it
     init_experiment(modules, datasets, **config['experiment']).run()
 
 

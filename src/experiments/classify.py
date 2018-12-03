@@ -18,12 +18,11 @@ class MNISTExperiment(EpochExperiment):
 		self.verbose = verbose
 
 		self.optim = optim.SGD(self.model.parameters(), lr=lr, momentum=momentum)
-		self.model.to(device)
+		self.to(device)
 
 	def __call__(self, batch, mode='train+eval'):
 		self.train('train' in mode)
 
-		result = {}
 		batch = batch.to(self.device)
 		output = self.model(batch['sample'])
 		loss = F.nll_loss(output, batch['class'])
