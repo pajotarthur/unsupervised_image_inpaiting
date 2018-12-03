@@ -12,8 +12,7 @@ def get_dataset_by_name(name):
     raise NotImplementedError(name)
 
 
-def init_dataset(config):
-    name, args = config['name'], config['args']
+def init_dataset(name, args):
     ds_args = args.copy()
     batch_size = ds_args.pop('batch_size')
     num_workers = ds_args.pop('num_workers')

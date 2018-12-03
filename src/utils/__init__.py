@@ -1,2 +1,2 @@
 
-from .config import ExperimentNew
+from .config import sacred_run

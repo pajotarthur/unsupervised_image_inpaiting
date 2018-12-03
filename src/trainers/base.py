@@ -1,6 +1,7 @@
 import src.utils.meters as meters
 
 
+
 class BaseTrainer():
 	def __init__(self, modules, datasets, **kwargs):
 		self._modules = modules
@@ -74,3 +75,11 @@ class BaseTrainer():
 		for name, metric in self._meters.items():
 			s += '{}'.format(metric.__repr__)
 		return s
+
+
+# class EpochExperiment(BaseTrainer):
+#     epochs = tqdm(range(1, config['nepochs'] + 1), ncols=0)
+#     for epoch in epochs:
+#         trainer.step()
+#         epochs.set_description_str('Id: {} Epoch:{}/{} {}'.
+#             format(_run._id, epoch, config['nepochs'], trainer))
