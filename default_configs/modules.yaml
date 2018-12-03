@@ -1,7 +1,7 @@
 
 
 mnist_classifier:
-    num_classes: 9
+    num_classes: 10
 
 # # Generators
 # common_generator:

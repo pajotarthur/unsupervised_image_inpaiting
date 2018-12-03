@@ -27,9 +27,8 @@ config:
 
 
     trainer:
-        name: classifier
+        name: mnist
         args:
-            hello: 1
-
-    ngpu: 1
-    nepochs: 10
+            device: cuda:0
+            nepochs: 10
+            lr: 0.0001

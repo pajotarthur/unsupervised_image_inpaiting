@@ -24,11 +24,11 @@ def train(config, _run=None):
 
     # initializing trainer
     trainer = init_trainer(modules, datasets, **config['trainer'])
-    trainer.fit()
+    trainer.run()
 
     # epochs = tqdm(range(1, config['nepochs'] + 1), ncols=0)
     # for epoch in epochs:
-    #     trainer.step()
+    #     meters = trainer.step()
     #     epochs.set_description_str('Id: {} Epoch:{}/{} {}'.
     #         format(_run._id, epoch, config['nepochs'], trainer))
 

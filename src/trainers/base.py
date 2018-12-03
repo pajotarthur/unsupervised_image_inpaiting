@@ -8,47 +8,7 @@ class BaseTrainer():
 		self._datasets = datasets
 		self._meters = {}
 
-	def train(self):
-		for name, dataset in self.datasets.items():
-			iter = 0
-			self.reset_metrics()
-			for batch in dataset:
-				iter += 1
-				self.forward(batch)
-				bs = len(batch[list(batch.keys())[0]])
-				self.update_metrics(
-					batch_size=bs
-				)
 
-				if (niter[name] != 'max') and (iter > niter):
-					break
-	
-	def forward(self):
-		raise NotImplementedError
-
-	def eval(self):
-		raise NotImplementedError
-
-	def register_metric(self, name, type='scalar'):
-		if type == 'scalar':
-			self._meters[name] = meters.ScalarMeter()
-		elif type == 'average':
-			self._meters[name] = meters.AverageMeter()
-		else:
-			raise NotImplementedError(name)
-
-	def update_meters(self, n=1):
-		for name, meter in self._meters.item():
-			if not hasattr(self, name):
-				raise Error('You have to log {}'.format(name))
-			value = getattr(self, name)
-			meter.update(value, n=n)
-
-	def __call__(self, *args, **kwargs):
-		for meter in self._meters.values():
-			meter.reset()
-		self.forward(*args, **kwargs)
-		return self._meters
 
 	def __getattr__(self, name):
 		if '_modules' in self.__dict__:
@@ -76,6 +36,46 @@ class BaseTrainer():
 			s += '{}'.format(metric.__repr__)
 		return s
 
+	# def train(self):
+	# 	for name, dataset in self.datasets.items():
+	# 		iter = 0
+	# 		self.reset_metrics()
+	# 		for batch in dataset:
+	# 			iter += 1
+	# 			self.forward(batch)
+	# 			bs = len(batch[list(batch.keys())[0]])
+	# 			self.update_metrics(
+	# 				batch_size=bs
+	# 			)
+
+	# 			if (niter[name] != 'max') and (iter > niter):
+	# 				break
+	
+	# def forward(self):
+	# 	raise NotImplementedError
+
+	# def register_metric(self, name, type='scalar'):
+	# 	if type == 'scalar':
+	# 		self._meters[name] = meters.ScalarMeter()
+	# 	elif type == 'average':
+	# 		self._meters[name] = meters.AverageMeter()
+	# 	else:
+	# 		raise NotImplementedError(name)
+
+	# def update_meters(self, n=1):
+	# 	for name, meter in self._meters.item():
+	# 		if not hasattr(self, name):
+	# 			raise Error('You have to log {}'.format(name))
+	# 		value = getattr(self, name)
+	# 		meter.update(value, n=n)
+
+	# def __call__(self, *args, **kwargs):
+	# 	for meter in self._meters.values():
+	# 		meter.reset()
+	# 	self.forward(*args, **kwargs)
+	# 	return self._meters
+
+	
 
 # class EpochExperiment(BaseTrainer):
 #     epochs = tqdm(range(1, config['nepochs'] + 1), ncols=0)
