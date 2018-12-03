@@ -58,6 +58,7 @@ def sacred_run(command, exp_name='train', default_configs_root='default_configs'
     #     return default_config
 
     def default_config(config, command_name, logger):
+        config = config['config']
         default_config = {}
         
         # loading modules default config
@@ -85,7 +86,7 @@ def sacred_run(command, exp_name='train', default_configs_root='default_configs'
         default_args = default_trainer_args[config['trainer']['name']]
         default_config['trainer']['args'] = default_args
 
-        return default_config        
+        return {'config': default_config}
 
     ex.config_hook(default_config)
     ex.main(command)

@@ -6,21 +6,11 @@ from sacred import Experiment
 from src.trainers import init_trainer
 from src.datasets import init_dataset
 from src.modules import init_module
-# from src.utils import init_config
 from src.utils import sacred_run
 
 
 
-def train(_run, modules, trainer, datasets, exp_name, nepochs, ngpu):
-
-    config = {
-        'modules': modules,
-        'trainer': trainer,
-        'datasets': datasets,
-    }
-    exit()
-    from pprint import pprint
-    pprint(config)
+def train(config, _run=None):
 
     # initializing datasets
     datasets = {}
