@@ -1,4 +1,3 @@
-
 from os.path import join
 from copy import deepcopy
 from sacred import Experiment
@@ -28,34 +27,33 @@ from sacred.config import load_config_file
 #             else:
 #                 return get_nested(value, *keys[1:])
 
+# sort of generic version of the config hook ... maybe for after...
+# def default_config(config, command_name, logger):
+#     default_config = {}
+#     for ingredient in ['modules', 'datasets', 'experiment']:
+#         fn = join(default_configs_root, ingredient + '.yaml')
+#         default_ingredient_args = load_config_file(fn)
+#         ingredient_config = config[ingredient]
+#         # if there is only one component per-ingredient,
+#         # like in experiment config
+#         if 'name' in ingredient_config:
+#             ingredient_config = {ingredient: ingredient_config}
+#         default_config[ingredient] = {}
+#         for component, component_config in ingredient_config.items():
+#             default_config[ingredient][component] = {}
+#             name = component_config['name']
+#             if 'name' in config[ingredient]:
+#                 default_config[ingredient]['args'] = default_ingredient_args[name]
+#             else:
+#                 default_config[ingredient][component]['args'] = default_ingredient_args[name]
+#     return default_config
 
-def sacred_run(command, exp_name='train', default_configs_root='default_configs'):
 
-    ex = Experiment(exp_name)
+def sacred_run(command, name='train', default_configs_root='default_configs'):
 
-    # sort of generic version... maybe for after...
-    # def default_config(config, command_name, logger):
-    #     default_config = {}
-    #     for ingredient in ['modules', 'datasets', 'trainer']:
-    #         fn = join(default_configs_root, ingredient + '.yaml')
-    #         default_ingredient_args = load_config_file(fn)
-    #         ingredient_config = config[ingredient]
+    ex = Experiment(name)
 
-    #         # if there is only one component per-ingredient,
-    #         # like in trainer config
-    #         if 'name' in ingredient_config:
-    #             ingredient_config = {ingredient: ingredient_config}
 
-    #         default_config[ingredient] = {}
-    #         for component, component_config in ingredient_config.items():
-    #             default_config[ingredient][component] = {}
-    #             name = component_config['name']
-    #             if 'name' in config[ingredient]:
-    #                 default_config[ingredient]['args'] = default_ingredient_args[name]
-    #             else:
-    #                 default_config[ingredient][component]['args'] = default_ingredient_args[name]
-
-    #     return default_config
 
     def default_config(config, command_name, logger):
         config = config['config']
@@ -79,12 +77,12 @@ def sacred_run(command, exp_name='train', default_configs_root='default_configs'
             default_args = default_datasets_args[dataset_config['name']]
             default_config['datasets'][dataset]['args'] = default_args
 
-        # loading trainer default configs
-        fn = join(default_configs_root, 'trainer.yaml')
-        default_trainer_args = load_config_file(fn)
-        default_config['trainer'] = {}
-        default_args = default_trainer_args[config['trainer']['name']]
-        default_config['trainer']['args'] = default_args
+        # loading experiment default configs
+        fn = join(default_configs_root, 'experiment.yaml')
+        default_experiment_args = load_config_file(fn)
+        default_config['experiment'] = {}
+        default_args = default_experiment_args[config['experiment']['name']]
+        default_config['experiment']['args'] = default_args
 
         return {'config': default_config}
 

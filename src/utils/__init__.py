@@ -1,2 +1,2 @@
 
-from .config import sacred_run
+from .run import sacred_run
