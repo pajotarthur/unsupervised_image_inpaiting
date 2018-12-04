@@ -1,5 +1,5 @@
+from collections import OrderedDict
 import torch
-
 
 class Meter():
     def __init__(self):
@@ -48,3 +48,27 @@ class AverageMeter(Meter):
 
     def get(self):
         return self.avg
+
+# class BestMeter(Meter):
+
+class Meters(OrderedDict):
+    def __init__(self, name, children):
+        self.name = name
+        self.update(children)
+
+    def update(self, n=1, **kwargs):
+        for name, value in kwargs.items():
+            self[name].update(value)
+
+    def __str__(self):
+        s = ''
+        for name, meter in self.items():
+            print('ok')
+            s += name
+        return s
+
+if __name__ == "__main__":
+
+    meters = Meters('train', children={'loss': AverageMeter(), 'prec': AverageMeter()})
+    print(meters)
+

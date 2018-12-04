@@ -1,7 +1,7 @@
 from src.experiments import init_experiment
 from src.datasets import init_dataset
 from src.modules import init_module
-from src.run import sacred_run
+from src.utils.run import sacred_run
 
 
 def init_and_run(config, _run=None):
