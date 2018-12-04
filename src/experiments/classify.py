@@ -21,6 +21,14 @@ class MNISTExperiment(EpochExperiment):
 
 		self.optim = optim.SGD(self.model.parameters(), lr=lr, momentum=momentum)
 		self.to(device)
+		self.init_metrics()
+
+	def init_metrics(self):
+		if self.train != []:
+			self.add_metrics(name='train', 
+				children=(meters.AverageMeter(), )
+			)
+
 
 	def __call__(self, batch, mode='train+eval'):
 		self.train('train' in mode)
