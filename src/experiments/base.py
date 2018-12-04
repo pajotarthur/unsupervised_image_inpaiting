@@ -1,3 +1,7 @@
+from torch.utils.data import DataLoader
+import torch.nn as nn
+
+
 import src.utils.meters as meters
 
 
@@ -41,21 +45,36 @@ class EpochExperiment(object):
 		for m in self.modules():
 			m.to(device)
 
-	# def modules(self):
-	# 	for name, module in self.named_modules():
-	# 		yield module
+	def modules(self):
+		for name, module in self.named_modules():
+			yield module
 
-	# def named_modules(self):
-	# 	for name, module in self._modules.items():
-	# 		yield name, module
+	def named_modules(self):
+		for name, module in self._modules.items():
+			yield name, module
 
-	# def datasets(self):
-	# 	for name, dataset in self.named_datasets():
-	# 		yield dataset
+	def datasets(self):
+		for name, dataset in self.named_datasets():
+			yield dataset
 
-	# def named_datasets(self):
-	# 	for name, dataset in self._datasets.items():
-	# 		yield name, dataset
+	def named_datasets(self):
+		for name, dataset in self._datasets.items():
+			yield name, dataset
+
+	def __setattr__(self, name, value):
+		if isinstance(value, nn.Module):
+			if not hasattr(self, '_modules'):
+				self._modules = []
+			self._modules[name] = value
+		elif isinstance(value, DataLoader):
+			if not hasattr(self, '_modules'):
+				self._datasets = []
+			self._datasets[name] = value
+		else:
+			object.__setattr__(self, name, value)
+
+	def __delattr__(self, name):
+		raise NotImplementedError
 
 	def __str__(self):
 		s = ''
