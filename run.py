@@ -1,8 +1,3 @@
-
-import torch
-from tqdm import tqdm
-from sacred import Experiment
-
 from src.experiments import init_experiment
 from src.datasets import init_dataset
 from src.modules import init_module
@@ -22,7 +17,7 @@ def init_and_run(config, _run=None):
         modules[module_name] = init_module(**module_config)
 
     # initializing experiment and running it
-    init_experiment(modules, datasets, **config['experiment']).run()
+    init_experiment(**modules, **datasets, **config['experiment']).run()
 
 
 if __name__ == '__main__':

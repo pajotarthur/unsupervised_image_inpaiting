@@ -53,8 +53,6 @@ def sacred_run(command, name='train', default_configs_root='default_configs'):
 
     ex = Experiment(name)
 
-
-
     def default_config(config, command_name, logger):
         config = config['config']
         default_config = {}

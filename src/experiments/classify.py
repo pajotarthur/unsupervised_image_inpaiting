@@ -5,12 +5,14 @@ from .base import EpochExperiment
 
 class MNISTExperiment(EpochExperiment):
 
-	def __init__(self, modules, datasets, lr, momentum, nepochs, device, niter, verbose):
-		super(MNISTTrainer, self).__init__(modules, datasets)
-		self.model = modules['model']
-		self.train = datasets.get('train', [])
-		self.val = datasets.get('val', [])
-		self.test = datasets.get('test', [])
+	def __init__(self, model, train=[], val=[], test=[],
+		lr=1e-3, momentum=0.9, nepochs=10, device='cuda:0',
+		niter='max', verbose=1):
+
+		self.model = model
+		self.train = train
+		self.val = val
+		self.test = test
 		self.lr = lr
 		self.nepochs = nepochs
 		self.device = device
@@ -23,7 +25,8 @@ class MNISTExperiment(EpochExperiment):
 	def __call__(self, batch, mode='train+eval'):
 		self.train('train' in mode)
 
-		batch = batch.to(self.device)
+		for b in batch.values():
+			b.to(self.device)
 		output = self.model(batch['sample'])
 		loss = F.nll_loss(output, batch['class'])
 
