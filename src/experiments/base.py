@@ -16,6 +16,7 @@ class EpochExperiment(object):
 			print(self)
 	
 	def run_epoch(self, epoch):
+		self.meters.reset()
 		self.meters['state'](**self.update_state(epoch))
 
 		for batch in self.train:
@@ -67,14 +68,15 @@ class EpochExperiment(object):
 				self._modules = []
 			self._modules[name] = value
 		elif isinstance(value, DataLoader):
-			if not hasattr(self, '_modules'):
+			if not hasattr(self, '_datasets'):
 				self._datasets = []
 			self._datasets[name] = value
 		else:
 			object.__setattr__(self, name, value)
 
-	def __delattr__(self, name):
-		raise NotImplementedError
+	# def __delattr__(self, name):
+	# 	if isinstance()
+	# 	raise NotImplementedError
 
 	def __str__(self):
 		s = ''
