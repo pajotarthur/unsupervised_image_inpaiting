@@ -5,6 +5,11 @@ common: &common
     shuffle: True
     drop_last: False
 
-mnist:
+mnist: &mnist
     batch_size : 64
+    root: '/local/debezenac/data/mnist'
+    download: True
     <<: *common
+
+fashion_mnist:
+  <<: *mnist

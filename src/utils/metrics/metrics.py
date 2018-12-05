@@ -55,6 +55,10 @@ class Metrics(object):
     def remove_metric(self, metric):
         self.metrics.pop(metric.name)
 
+    def reset(self):
+        for metric in self.metrics.values():
+            metric.reset()
+
     def __getattr__(self, name):
         if name in self.metrics:
             return self.metrics[name]

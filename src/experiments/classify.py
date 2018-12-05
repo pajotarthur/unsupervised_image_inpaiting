@@ -1,6 +1,6 @@
 import torch.optim as optim
 
-from src.utils.metric import Metrics
+from src.utils.metrics import Metrics
 
 from .base import EpochExperiment
 
@@ -29,18 +29,17 @@ class MNISTExperiment(EpochExperiment):
     def init_metrics(self):
         m = Metrics()
         for name, _ in self.named_datasets():
-            m.ParentWrapper(name=name,
+            m.Parent(name=name,
                 children=(m.AvgMetric(name='loss'),
                           m.AvgMetric(name='acc'))
             )
-        m.ParentWrapper(
-            name='parent',
+        m.Parent(name='state',
             children=(m.AvgMetric(name='lr'),),
         )
         return m
 
     def __call__(self, batch, mode='train+eval'):
-        self.train('train' in mode)
+        self.train_mode('train' in mode)
 
         for b in batch.values():
             b.to(self.device)
@@ -54,11 +53,11 @@ class MNISTExperiment(EpochExperiment):
 
         eval_results = {}
         if 'eval' in mode:
-            self.eval()
+            self.eval_mode()
             pred = output.max(1, keepdim=True)[1]
             correct = pred.eq(target.view_as(pred)).sum()
             eval_results['acc'] = correct
-
+        print('eval', eval_results)
         return {
             'loss': loss,
             **eval_results,

@@ -15,33 +15,18 @@ class BaseExperiment(object):
 			self.run_epoch(epoch)
 			print(self)
 	
-	def run_epoch(self, epoch):
-		self.metrics.reset()
-		
-		self.metrics['state'](**self.update_state(epoch))
-
-		for batch in self.train:
-			self.logger.Parent_Train()
-			self.metrics['train'](**self(batch, mode='train+eval'), n=size(batch))
-
-		for batch in self.val:
-			self.metrics['val'](**self(batch, mode='eval'), n=size(batch))
-
-		for batch in self.test:
-			self.metrics['test'](**self(batch, mode='eval'), n=size(batch))
-	
 	def update_state(self, epoch):
 		return self.get_state()
 
 	def get_state(self):
-		return
+		return {}
 
-	def train(self, mode=True):
+	def train_mode(self, mode=True):
 		torch.no_grad(not mode)
 		for m in self.modules():
 			m.train(mode)
 	
-	def eval(self):
+	def eval_mode(self):
 		self.train(mode=False)
 
 	def to(self, device):
@@ -76,7 +61,6 @@ class BaseExperiment(object):
 		else:
 			object.__setattr__(self, name, value)
 
-
 	def __getattr__(self, name):
 		if '_modules' in self.__dict__:
 			modules = self.__dict__['_modules']
@@ -101,18 +85,18 @@ class EpochExperiment(BaseExperiment):
 			print(self)
 	
 	def run_epoch(self, epoch):
-		self.metrics.reset()
-		self.metrics['state'](**self.update_state(epoch))
+		self.metrics.state.update(**self.update_state(epoch))
 
 		for batch in self.train:
-			self.logger.Parent_Train()
-			self.metrics['train'](**self(batch, mode='train+eval'), n=size(batch))
+			self.metrics.train.update(**self(batch, mode='train+eval'), n=size(batch))
 
 		for batch in self.val:
-			self.metrics['val'](**self(batch, mode='eval'), n=size(batch))
+			self.metrics.val.update(**self(batch, mode='eval'), n=size(batch))
 
 		for batch in self.test:
-			self.metrics['test'](**self(batch, mode='eval'), n=size(batch))
+			self.metrics.test.update(**self(batch, mode='eval'), n=size(batch))
+		
+		self.metrics.reset()
 
 	def __str__(self):
 		s = ''

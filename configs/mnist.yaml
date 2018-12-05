@@ -3,24 +3,18 @@ config:
     modules:
         model:
             name: mnist_classifier
-            args:
-                num_classes: 10
 
     datasets:
         train:
             name: mnist
             args:
-                root: '/local/debezenac/data/mnist'
                 train: True
-                download: True
                 batch_size: &batch_size 22
 
         test:
             name: mnist
             args:
-                root: '/local/debezenac/data/mnist'
                 train: False
-                download: True
                 batch_size: *batch_size
 
     experiment:
