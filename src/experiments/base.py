@@ -1,32 +1,34 @@
 from torch.utils.data import DataLoader
 import torch.nn as nn
 
-
-import src.utils.meters as meters
+from collections import OrderedDict
 
 
 def size(batch):
 	return next(iter(batch)).shape[0]
 
 
-class EpochExperiment(object):
+
+class BaseExperiment(object):
 	def run(self, mode='train+eval'):
 		for epoch in range(1, self.nepochs + 1):
 			self.run_epoch(epoch)
 			print(self)
 	
 	def run_epoch(self, epoch):
-		self.meters.reset()
-		self.meters['state'](**self.update_state(epoch))
+		self.metrics.reset()
+		
+		self.metrics['state'](**self.update_state(epoch))
 
 		for batch in self.train:
-			self.meters['train'](**self(batch, mode='train+eval'), n=size(batch))
+			self.logger.Parent_Train()
+			self.metrics['train'](**self(batch, mode='train+eval'), n=size(batch))
 
 		for batch in self.val:
-			self.meters['val'](**self(batch, mode='eval'), n=size(batch))
+			self.metrics['val'](**self(batch, mode='eval'), n=size(batch))
 
 		for batch in self.test:
-			self.meters['test'](**self(batch, mode='eval'), n=size(batch))
+			self.metrics['test'](**self(batch, mode='eval'), n=size(batch))
 	
 	def update_state(self, epoch):
 		return self.get_state()
@@ -65,25 +67,59 @@ class EpochExperiment(object):
 	def __setattr__(self, name, value):
 		if isinstance(value, nn.Module):
 			if not hasattr(self, '_modules'):
-				self._modules = []
+				self._modules = OrderedDict()
 			self._modules[name] = value
 		elif isinstance(value, DataLoader):
 			if not hasattr(self, '_datasets'):
-				self._datasets = []
+				self._datasets = OrderedDict()
 			self._datasets[name] = value
 		else:
 			object.__setattr__(self, name, value)
 
+
+	def __getattr__(self, name):
+		if '_modules' in self.__dict__:
+			modules = self.__dict__['_modules']
+			if name in modules:
+				return modules[name]
+		if '_datasets' in self.__dict__:
+			datasets = self.__dict__['_datasets']
+			if name in datasets:
+				return datasets[name]
+		raise AttributeError("'{}' object has no attribute '{}'".format(
+			type(self).__name__, name))		
 	# def __delattr__(self, name):
 	# 	if isinstance()
 	# 	raise NotImplementedError
 
+
+
+class EpochExperiment(BaseExperiment):
+	def run(self, mode='train+eval'):
+		for epoch in range(1, self.nepochs + 1):
+			self.run_epoch(epoch)
+			print(self)
+	
+	def run_epoch(self, epoch):
+		self.metrics.reset()
+		self.metrics['state'](**self.update_state(epoch))
+
+		for batch in self.train:
+			self.logger.Parent_Train()
+			self.metrics['train'](**self(batch, mode='train+eval'), n=size(batch))
+
+		for batch in self.val:
+			self.metrics['val'](**self(batch, mode='eval'), n=size(batch))
+
+		for batch in self.test:
+			self.metrics['test'](**self(batch, mode='eval'), n=size(batch))
+
 	def __str__(self):
 		s = ''
 		if self.verbose > 0:
-			s += ' '.join([m.__str__() for m in self.meters['eval']])
+			s += ' '.join([m.__str__() for m in self.metrics['eval']])
 		if self.verbose > 1:
-			s += ' '.join([m.__str__() for m in self.meters['train']])
+			s += ' '.join([m.__str__() for m in self.metrics['train']])
 		if self.verbose > 2:
-			s += ' '.join([m.__str__() for m in self.meters['state']])
+			s += ' '.join([m.__str__() for m in self.metrics['state']])
 		return s

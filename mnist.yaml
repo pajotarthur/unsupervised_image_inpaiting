@@ -1,6 +1,5 @@
-
 config:
-
+    
     modules:
         model:
             name: mnist_classifier
