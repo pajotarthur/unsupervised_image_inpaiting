@@ -38,4 +38,4 @@ def init_dataset(name, args):
                     shuffle=shuffle,
                     drop_last=drop_last,
                     )
-    return 
+    return dl
