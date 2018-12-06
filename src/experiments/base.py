@@ -95,23 +95,25 @@ class EpochExperiment(BaseExperiment):
 		with torch.set_grad_enabled(True):
 			for batch in train:
 				self.metrics.train.update(**self(**batch, mode='train+eval'), n=size(batch))
-				train.set_postfix_str(str(self.metrics.train))
+				if self.use_tqdm:
+					train.set_postfix_str(str(self.metrics.train))
 
 		test = tqdm(self.test) if self.use_tqdm else self.test
 		with torch.set_grad_enabled(False):
 			for batch in test:
 				self.metrics.test.update(**self(**batch, mode='eval'), n=size(batch))
-				test.set_postfix_str(str(self.metrics.test))
+				if self.use_tqdm:
+					test.set_postfix_str(str(self.metrics.test))
 		
 		self.metrics.reset()
 
-	# def __str__(self):
-	# 	return str(self.metrics)
-	# 	s = ''
-	# 	if self.verbose > 0:
-	# 		s += str(self.metrics.test)
-	# 	if self.verbose > 1:
-	# 		s += str(self.metrics.train)
-	# 	if self.verbose > 2:
-	# 		s += str(self.metrics.state)
-	# 	return s
+	def __str__(self):
+		return str(self.metrics)
+		s = ''
+		if self.verbose > 0:
+			s += str(self.metrics.test)
+		if self.verbose > 1:
+			s += str(self.metrics.train)
+		if self.verbose > 2:
+			s += str(self.metrics.state)
+		return s
