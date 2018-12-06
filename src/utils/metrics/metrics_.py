@@ -44,6 +44,9 @@ class BaseMetric_(object):
     def value(self):
         return self.get()
 
+    def __str__(self):
+        return '{}: {:.3f}'.format(self.name, self.value)
+
 
 class SimpleMetric_(BaseMetric_):
     def __init__(self, name, time_idx):
@@ -162,14 +165,15 @@ class Parent_(BaseMetric_):
             self.children[key].update(value, n)
         return self
 
-    def add_child(self, child):
-        if child.name in self.children:
-            raise Error('{} already in {}'.format(child.name, self.name))
-        self.children[child.name] = child
-
     def reset(self):
         for child in self.children.values():
             child.reset()
+    
+    def get(self):
+        res = dict()
+        for (name, child) in viewitems(self.children):
+            res[name] = child.get()
+        return res
 
     def __getattr__(self, name):
         if name in self.children:
@@ -177,12 +181,9 @@ class Parent_(BaseMetric_):
         raise AttributeError("'{}' object has no attribute '{}'".format(
             type(self).__name__, name))                 
 
-    def get(self):
-        res = dict()
-        for (name, child) in viewitems(self.children):
-            res[name] = child.get()
-        return res
-
+    def __str__(self):
+        s = ' '.join([str(c) for c in self.children.values()])
+        return '{}: {}\n'.format(self.name, s)
 
 class DynamicMetric_(BaseMetric_):
     def __init__(self, name, time_idx, fun=None):

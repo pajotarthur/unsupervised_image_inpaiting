@@ -1,7 +1,7 @@
 import time
 from collections import defaultdict, OrderedDict
 
-from ._metrics import TimeMetric_, AvgMetric_, SumMetric_, Parent_,\
+from .metrics_ import TimeMetric_, AvgMetric_, SumMetric_, Parent_,\
     SimpleMetric_, BestMetric_, DynamicMetric_
 
 
@@ -64,3 +64,10 @@ class Metrics(object):
             return self.metrics[name]
         raise AttributeError("'{}' object has no attribute '{}'".format(
             type(self).__name__, name))
+
+    def __str__(self):
+        s = ''
+        for name, metric in self.metrics.items():
+            s += str(metric)
+        return s
+

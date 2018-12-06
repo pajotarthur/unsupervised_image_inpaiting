@@ -1,7 +1,7 @@
 import torch.optim as optim
+import torch.nn.functional as F
 
 from src.utils.metrics import Metrics
-
 from .base import EpochExperiment
 
 
@@ -38,26 +38,26 @@ class MNISTExperiment(EpochExperiment):
         )
         return m
 
-    def __call__(self, batch, mode='train+eval'):
-        self.train_mode('train' in mode)
+    def __call__(self, input, target, mode='train+eval'):
+        input = input.to(self.device)
+        target = target.to(self.device)
 
-        for b in batch.values():
-            b.to(self.device)
-        output = self.model(batch['sample'])
-        loss = F.nll_loss(output, batch['class'])
+        self.train_mode('train' in mode)
+        output = self.model(input)
+        loss = F.nll_loss(output, target)
 
         if 'train' in mode:
             self.optim.zero_grad()
-            self.loss.backward()
+            loss.backward()
             self.optim.step()
 
         eval_results = {}
         if 'eval' in mode:
-            self.eval_mode()
+            self.train_mode(False)
             pred = output.max(1, keepdim=True)[1]
             correct = pred.eq(target.view_as(pred)).sum()
             eval_results['acc'] = correct
-        print('eval', eval_results)
+
         return {
             'loss': loss,
             **eval_results,
