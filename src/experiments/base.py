@@ -2,7 +2,9 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
+from torch.optim import Optimizer
 from tqdm import tqdm, trange
+
 
 def size(batch):
     if isinstance(batch, dict):
@@ -13,8 +15,16 @@ def size(batch):
     else:
         raise NotImplementedError
 
+def to_device(batch, device):
+    for key in batch:
+        batch[key] = batch[key].to(device)
+        
 
 class BaseExperiment(object):
+    def __init__(self, device='cuda:0', verbose=1):
+        self.device = device
+        self.verbose = verbose
+
     def run(self, mode='train+eval'):
         for epoch in range(1, self.nepochs + 1):
             self.run_epoch(epoch)
@@ -33,9 +43,9 @@ class BaseExperiment(object):
     def eval_mode(self):
         self.train_mode(mode=False)
 
-    def to(self, device):
+    def to_device(self):
         for m in self.modules():
-            m.to(device)
+            m.to(self.device)
 
     def modules(self):
         for name, module in self.named_modules():
@@ -62,6 +72,10 @@ class BaseExperiment(object):
             if not hasattr(self, '_datasets'):
                 self._datasets = OrderedDict()
             self._datasets[name] = value
+        elif isinstance(value, Optimizer):
+            if not hasattr(self, '_optimizers'):
+                self._optimizers = OrderedDict()
+            self._optimizers[name] = value
         else:
             object.__setattr__(self, name, value)
 
@@ -74,6 +88,9 @@ class BaseExperiment(object):
             datasets = self.__dict__['_datasets']
             if name in datasets:
                 return datasets[name]
+        if '_optimizers' in self.__dict__:
+            optimizers = self.__dict__['_optimizers']
+            return optimizers[name]
         raise AttributeError("'{}' object has no attribute '{}'".format(
             type(self).__name__, name))     
     
@@ -83,37 +100,48 @@ class BaseExperiment(object):
 
 
 class EpochExperiment(BaseExperiment):
+    def __init__(self, nepochs=100, use_tqdm=True, niter='max', **kwargs):
+        super(EpochExperiment, self).__init__(**kwargs)
+        self.nepochs = nepochs
+        self.use_tqdm = use_tqdm
+        self.niter = niter
+
     def run(self, mode='train+eval'):
+        self.metrics = self.init_metrics()
+        self.to_device()
         epochs = trange(1, self.nepochs + 1) if self.use_tqdm else range(1, self.nepochs)
         for epoch in epochs:
             self.run_epoch(epoch)
-    
+            self.metrics.reset()
+
     def run_epoch(self, epoch):
         self.metrics.state.update(**self.update_state(epoch))
 
         train = tqdm(self.train) if self.use_tqdm else self.train
         with torch.set_grad_enabled(True):
             for batch in train:
-                self.metrics.train.update(**self(**batch, mode='train+eval'), n=size(batch))
+                to_device(batch, self.device)
+                output = self(**batch, mode='train+eval')
+                self.metrics.train.update(**output, n=size(batch))
                 if self.use_tqdm:
                     train.set_postfix_str(str(self.metrics.train))
 
         test = tqdm(self.test) if self.use_tqdm else self.test
         with torch.set_grad_enabled(False):
             for batch in test:
-                self.metrics.test.update(**self(**batch, mode='eval'), n=size(batch))
+                to_device(batch, self.device)
+                output = self(**batch, mode='eval')
+                self.metrics.test.update(**output, n=size(batch))
                 if self.use_tqdm:
                     test.set_postfix_str(str(self.metrics.test))
 
-        self.metrics.reset()
-
     def __str__(self):
         return str(self.metrics)
-        s = ''
-        if self.verbose > 0:
-            s += str(self.metrics.test)
-        if self.verbose > 1:
-            s += str(self.metrics.train)
-        if self.verbose > 2:
-            s += str(self.metrics.state)
-        return s
+        # s = ''
+        # if self.verbose > 0:
+        #     s += str(self.metrics.test)
+        # if self.verbose > 1:
+        #     s += str(self.metrics.train)
+        # if self.verbose > 2:
+        #     s += str(self.metrics.state)
+        # return s

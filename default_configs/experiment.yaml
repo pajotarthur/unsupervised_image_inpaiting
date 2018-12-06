@@ -8,8 +8,6 @@ common: &common
 
 mnist:
     nepochs: 10
-    lr: 0.003
-    momentum: 0.9
     niter:
       train: max
       val: 10
