@@ -40,15 +40,15 @@ class MNISTExperiment(EpochExperiment):
             loss.backward()
             self.optim.step()
 
-        eval_results = {}
+        results = {}
         if evaluate:
             with torch.no_grad():
                 self.train_mode(False)
                 pred = output.max(1, keepdim=True)[1]
                 correct = pred.eq(target.view_as(pred)).sum()
-                eval_results['acc'] = correct
+                results['acc'] = correct
 
         return {
             'loss': loss,
-            **eval_results,
+            **results,
         }
