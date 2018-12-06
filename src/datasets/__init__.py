@@ -25,7 +25,6 @@ def mnist(fashion=False, *args, **kwargs):
     return cl(transform=transform, *args, **kwargs)
 
 
-
 def init_dataset(name, args):
     ds_args = args.copy()
     batch_size = ds_args.pop('batch_size')
@@ -39,4 +38,4 @@ def init_dataset(name, args):
                     shuffle=shuffle,
                     drop_last=drop_last,
                     )
-    return dl
+    return 
