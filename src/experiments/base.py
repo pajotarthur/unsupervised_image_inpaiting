@@ -2,7 +2,7 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from tqdm import tqdm
+from tqdm import tqdm, trange
 
 def size(batch):
 	if isinstance(batch, dict):
@@ -61,8 +61,6 @@ class BaseExperiment(object):
 		elif isinstance(value, DataLoader):
 			if not hasattr(self, '_datasets'):
 				self._datasets = OrderedDict()
-			if True or self.tqdm:
-				value = tqdm(value)
 			self._datasets[name] = value
 		else:
 			object.__setattr__(self, name, value)
@@ -86,24 +84,24 @@ class BaseExperiment(object):
 
 class EpochExperiment(BaseExperiment):
 	def run(self, mode='train+eval'):
-		for epoch in range(1, self.nepochs + 1):
+		epochs = trange(1, self.nepochs + 1) if self.use_tqdm else range(1, self.nepochs)
+		for epoch in epochs:
 			self.run_epoch(epoch)
 	
 	def run_epoch(self, epoch):
 		self.metrics.state.update(**self.update_state(epoch))
 
+		train = tqdm(self.train) if self.use_tqdm else self.train
 		with torch.set_grad_enabled(True):
-			for batch in self.train:
+			for batch in train:
 				self.metrics.train.update(**self(**batch, mode='train+eval'), n=size(batch))
-			print(self.metrics.train)
+				train.set_postfix_str(str(self.metrics.train))
 
+		test = tqdm(self.test) if self.use_tqdm else self.test
 		with torch.set_grad_enabled(False):
-			# for batch in self.val:
-			# 	self.metrics.val.update(**self(**batch, mode='eval'), n=size(batch))
-
-			for batch in self.test:
+			for batch in test:
 				self.metrics.test.update(**self(**batch, mode='eval'), n=size(batch))
-			print(self.metrics.test)
+				test.set_postfix_str(str(self.metrics.test))
 		
 		self.metrics.reset()
 

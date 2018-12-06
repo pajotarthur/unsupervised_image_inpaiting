@@ -183,7 +183,7 @@ class Parent_(BaseMetric_):
 
     def __str__(self):
         s = ' '.join([str(c) for c in self.children.values()])
-        return '{}: {}\n'.format(self.name, s)
+        return '{}: {}'.format(self.name, s)
 
 class DynamicMetric_(BaseMetric_):
     def __init__(self, name, time_idx, fun=None):

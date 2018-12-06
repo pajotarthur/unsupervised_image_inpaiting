@@ -9,7 +9,7 @@ class MNISTExperiment(EpochExperiment):
 
     def __init__(self, model, train=[], val=[], test=[],
         lr=1e-3, momentum=0.9, nepochs=10, device='cuda:0',
-        niter='max', verbose=1):
+        niter='max', verbose=1, use_tqdm=True):
         super(MNISTExperiment, self).__init__()
 
         self.model = model
@@ -21,6 +21,7 @@ class MNISTExperiment(EpochExperiment):
         self.device = device
         self.niter = niter
         self.verbose = verbose
+        self.use_tqdm = use_tqdm
 
         self.optim = optim.SGD(self.model.parameters(), lr=lr, momentum=momentum)
         self.metrics = self.init_metrics()
