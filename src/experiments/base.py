@@ -1,9 +1,9 @@
 from collections import OrderedDict
+from tqdm import tqdm, trange
 import torch
-import torch.nn as nn
+from torch.nn import Module
 from torch.utils.data import DataLoader
 from torch.optim import Optimizer
-from tqdm import tqdm, trange
 
 
 def size(batch):
@@ -21,9 +21,11 @@ def to_device(batch, device):
 
 
 class BaseExperiment(object):
-    def __init__(self, device='cuda:0', verbose=1):
+    def __init__(self, device='cuda:0', verbose=1, train=True, evaluate=True):
         self.device = device
         self.verbose = verbose
+        self.train = train
+        self.evaluate = evaluate
 
     def update_state(self, epoch):
         return self.get_state()
@@ -58,8 +60,16 @@ class BaseExperiment(object):
         for name, dataset in self._datasets.items():
             yield name, dataset
 
+    def optimizers(self):
+        for name, optimizer in self.named_optimizers():
+            yield optimizer
+
+    def named_optimizers(self):
+        for name, optimizer in self._optimizers.items():
+            yield name, optimizer
+
     def __setattr__(self, name, value):
-        if isinstance(value, nn.Module):
+        if isinstance(value, Module):
             if not hasattr(self, '_modules'):
                 self._modules = OrderedDict()
             self._modules[name] = value
@@ -89,28 +99,33 @@ class BaseExperiment(object):
         raise AttributeError("'{}' object has no attribute '{}'".format(
             type(self).__name__, name))     
     
-    # def __delattr__(self, name):
-    #   if isinstance()
-    #   raise NotImplementedError
+    def __delattr__(self, name):
+        if name in self._modules:
+            del self._modules[name]
+        elif name in self._datasets:
+            del self._datasets[name]
+        elif name in self._optimizers:
+            del self._optimizers[name]
+        else:
+            object.__delattr__(self, name)
 
 
 class EpochExperiment(BaseExperiment):
-    def __init__(self, nepochs=100, use_tqdm=True, niter='max', mode='train+eval', **kwargs):
+    def __init__(self, nepochs=100, use_tqdm=True, niter='max', **kwargs):
         super(EpochExperiment, self).__init__(**kwargs)
         self.nepochs = nepochs
         self.use_tqdm = use_tqdm
         self.niter = niter
-        self.mode = mode
 
     def run(self, _run=None):
         self.metrics = self.init_metrics(_run)
         self.to_device()
         epochs = trange(1, self.nepochs + 1) if self.use_tqdm else range(1, self.nepochs)
         for epoch in epochs:
-            self.run_epoch(epoch, self.mode, _run)
+            self.run_epoch(epoch, self.train, self.evaluate, _run)
             self.metrics.reset()
 
-    def run_epoch(self, epoch, train=True, eval=True, _run=None):
+    def run_epoch(self, epoch, train=True, evaluate=True, _run=None):
         self.metrics.state.update(**self.update_state(epoch))
         for split, dataset in self.named_datasets():
             dataset = tqdm(dataset) if self.use_tqdm else dataset
@@ -118,7 +133,7 @@ class EpochExperiment(BaseExperiment):
                 metrics = getattr(self.metrics, split)
                 for batch in dataset:
                     to_device(batch, self.device)
-                    output = self(**batch, train=(split=='train'), eval=eval)
+                    output = self(**batch, train=(split=='train'), evaluate=evaluate)
                     metrics.update(**output, n=size(batch))
                     if self.use_tqdm:
                         dataset.set_postfix_str(str(metrics))

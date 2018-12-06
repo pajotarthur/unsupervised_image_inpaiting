@@ -7,12 +7,12 @@ from .base import EpochExperiment
 
 class MNISTExperiment(EpochExperiment):
 
-    def __init__(self, model, optim, train=[], val=[], test=[], **kwargs):
+    def __init__(self, model, optim, trainset=[], valset=[], testset=[], **kwargs):
         super(MNISTExperiment, self).__init__(**kwargs)
         self.model = model
-        self.train = train
-        self.val = val
-        self.test = test
+        self.train = trainset
+        self.valset = valset
+        self.testset = testset
         self.optim = optim
 
     def init_metrics(self, *args, **kwargs):
@@ -27,18 +27,21 @@ class MNISTExperiment(EpochExperiment):
         )
         return m
 
-    def __call__(self, input, target, mode='train+eval'):
-        self.train_mode('train' in mode)
+    def update_state(self,):
+        pass
+
+    def __call__(self, input, target, train=True, evaluate=True):
+        self.train_mode(train)
         output = self.model(input)
         loss = F.nll_loss(output, target)
 
-        if 'train' in mode:
+        if train:
             self.optim.zero_grad()
             loss.backward()
             self.optim.step()
 
         eval_results = {}
-        if 'eval' in mode:
+        if evaluate:
             with torch.no_grad():
                 self.train_mode(False)
                 pred = output.max(1, keepdim=True)[1]
