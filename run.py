@@ -17,12 +17,13 @@ def init_and_run(experiment, modules, datasets, optimizers, _run=None):
     for module_name, module_config in modules.items():
         mods[module_name] = init_module(**module_config)
 
+    # initializing optimizers
     optims = {}
     for optimizer_name, optimizer_config in optimizers.items():
         optims[optimizer_name] = init_optimizer(mods, **optimizer_config)
 
     # initializing experiment and running it
-    init_experiment(**mods, **dsets, **optims, **experiment).run()
+    init_experiment(**mods, **dsets, **optims, **experiment).run(_run)
 
 
 if __name__ == '__main__':
