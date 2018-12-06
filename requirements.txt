@@ -1,1 +1,6 @@
-sacred=0.7.4
+tqdm
+numpy
+torch
+torchvision
+-e git://github.com/IDSIA/sacred.git#egg=sacred
+pyyaml
