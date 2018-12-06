@@ -1,25 +1,23 @@
-config:
-    
-    modules:
-        model:
-            name: mnist_classifier
+modules:
+    model:
+        name: mnist_classifier
 
-    datasets:
-        train:
-            name: mnist
-            args:
-                train: True
-                batch_size: &batch_size 22
-
-        test:
-            name: mnist
-            args:
-                train: False
-                batch_size: *batch_size
-
-    experiment:
+datasets:
+    train:
         name: mnist
         args:
-            device: cuda:0
-            nepochs: 10
-            lr: 0.0001
+            train: True
+            batch_size: &batch_size 22
+
+    test:
+        name: mnist
+        args:
+            train: False
+            batch_size: *batch_size
+
+experiment:
+    name: mnist
+    args:
+        device: cuda:0
+        nepochs: 10
+        lr: 0.0001

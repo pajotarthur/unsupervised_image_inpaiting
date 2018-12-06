@@ -54,7 +54,6 @@ def sacred_run(command, name='train', default_configs_root='default_configs'):
     ex = Experiment(name)
 
     def default_config(config, command_name, logger):
-        config = config['config']
         default_config = {}
         
         # loading modules default config
@@ -82,7 +81,7 @@ def sacred_run(command, name='train', default_configs_root='default_configs'):
         default_args = default_experiment_args[config['experiment']['name']]
         default_config['experiment']['args'] = default_args
 
-        return {'config': default_config}
+        return default_config
 
     ex.config_hook(default_config)
     ex.main(command)

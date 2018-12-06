@@ -4,20 +4,20 @@ from src.modules import init_module
 from src.utils.run import sacred_run
 
 
-def init_and_run(config, _run=None):
+def init_and_run(experiment, modules, datasets, _run=None):
 
     # initializing datasets
-    datasets = {}
-    for dataset_name, dataset_config in config['datasets'].items():
-        datasets[dataset_name] = init_dataset(**dataset_config)
+    dsets = {}
+    for dataset_name, dataset_config in datasets.items():
+        dsets[dataset_name] = init_dataset(**dataset_config)
 
     # initializing modules
-    modules = {}
-    for module_name, module_config in config['modules'].items():
-        modules[module_name] = init_module(**module_config)
+    mods = {}
+    for module_name, module_config in modules.items():
+        mods[module_name] = init_module(**module_config)
 
     # initializing experiment and running it
-    init_experiment(**modules, **datasets, **config['experiment']).run()
+    init_experiment(**mods, **dsets, **experiment).run()
 
 
 if __name__ == '__main__':
