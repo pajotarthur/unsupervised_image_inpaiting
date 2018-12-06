@@ -61,25 +61,22 @@ def sacred_run(command, name='train', default_configs_root='default_configs'):
         default_modules_args = load_config_file(fn)
         default_config['modules'] = {}
         for module, module_config in config['modules'].items():
-            default_config['modules'][module] = {}
-            default_args = default_modules_args[module_config['name']]
-            default_config['modules'][module]['args'] = default_args
+            default_args = default_modules_args[module_config['_name']]
+            default_config['modules'][module] = default_args
 
         # loading datasets default config
         fn = join(default_configs_root, 'datasets.yaml')
         default_datasets_args = load_config_file(fn)
         default_config['datasets'] = {}
         for dataset, dataset_config in config['datasets'].items():
-            default_config['datasets'][dataset] = {}
-            default_args = default_datasets_args[dataset_config['name']]
-            default_config['datasets'][dataset]['args'] = default_args
+            default_args = default_datasets_args[dataset_config['_name']]
+            default_config['datasets'][dataset] = default_args
 
         # loading experiment default configs
         fn = join(default_configs_root, 'experiment.yaml')
         default_experiment_args = load_config_file(fn)
-        default_config['experiment'] = {}
-        default_args = default_experiment_args[config['experiment']['name']]
-        default_config['experiment']['args'] = default_args
+        default_args = default_experiment_args[config['experiment']['_name']]
+        default_config['experiment'] = default_args
 
         return default_config
 

@@ -44,9 +44,6 @@ class BaseMetric_(object):
     def value(self):
         return self.get()
 
-    def __str__(self):
-        return '{}: {:.3f}'.format(self.name, self.value)
-
 
 class SimpleMetric_(BaseMetric_):
     def __init__(self, name, time_idx):
@@ -135,6 +132,9 @@ class Accumulator_(BaseMetric_):
 
     def get(self):
         raise NotImplementedError("Accumulator should be subclassed")
+
+    def __str__(self):
+        return '{}: {:.3f}'.format(self.name, self.value)
 
 
 class AvgMetric_(Accumulator_):

@@ -6,6 +6,5 @@ def get_experiment_by_name(name):
 		return MNISTExperiment
 	raise NotImplementedError(name)
 
-def init_experiment(name, **kwargs):
-	args = kwargs.pop('args')
-	return get_experiment_by_name(name)(**args, **kwargs)
+def init_experiment(_name, **kwargs):
+	return get_experiment_by_name(_name)(**kwargs)
