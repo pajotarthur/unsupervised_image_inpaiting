@@ -102,7 +102,7 @@ class EpochExperiment(BaseExperiment):
         self.niter = niter
         self.mode = mode
 
-    def run(self, _run=None, mode='train+eval'):
+    def run(self, _run=None):
         self.metrics = self.init_metrics(_run)
         self.to_device()
         epochs = trange(1, self.nepochs + 1) if self.use_tqdm else range(1, self.nepochs)
@@ -110,39 +110,18 @@ class EpochExperiment(BaseExperiment):
             self.run_epoch(epoch, self.mode, _run)
             self.metrics.reset()
 
-    def run_epoch(self, epoch, mode, _run=None):
+    def run_epoch(self, epoch, train=True, eval=True, _run=None):
         self.metrics.state.update(**self.update_state(epoch))
-
-        # attempt at making it generic
-        # for split, dataset in self.named_datasets():
-        #     dataset = tqdm(dataset) if self.use_tqdm else dataset
-        #     with torch.set_grad_enabled(('train' in mode) and (split == 'train')):
-        #         for batch in dataset:
-        #             to_device(batch, self.device)
-        #             mode = 'train+eval' if split=='train' else 'eval'
-        #             output = self(**batch, mode=mode)
-        #             self.metrics.dataset.update(**output, n=size(batch))
-        #             if self.use_tqdm:
-        #                 dataset.set_postfix_str(str(self.metrics.dataset))
-
-        train = tqdm(self.train) if self.use_tqdm else self.train
-        with torch.set_grad_enabled(True):
-            for batch in train:
-                to_device(batch, self.device)
-                output = self(**batch, mode='train+eval')
-                self.metrics.train.update(**output, n=size(batch))
-                if self.use_tqdm:
-                    s = str(getattr(self.metrics, split))
-                    train.set_postfix_str(s)
-
-        test = tqdm(self.test) if self.use_tqdm else self.test
-        with torch.set_grad_enabled(False):
-            for batch in test:
-                to_device(batch, self.device)
-                output = self(**batch, mode='eval')
-                self.metrics.test.update(**output, n=size(batch))
-                if self.use_tqdm:
-                    test.set_postfix_str(str(self.metrics.test))
+        for split, dataset in self.named_datasets():
+            dataset = tqdm(dataset) if self.use_tqdm else dataset
+            with torch.set_grad_enabled(train and (split == 'train')):
+                metrics = getattr(self.metrics, split)
+                for batch in dataset:
+                    to_device(batch, self.device)
+                    output = self(**batch, train=(split=='train'), eval=eval)
+                    metrics.update(**output, n=size(batch))
+                    if self.use_tqdm:
+                        dataset.set_postfix_str(str(metrics))
 
     def __str__(self):
         return str(self.metrics)
