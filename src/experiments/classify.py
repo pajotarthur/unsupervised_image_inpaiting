@@ -15,8 +15,8 @@ class MNISTExperiment(EpochExperiment):
         self.test = test
         self.optim = optim
 
-    def init_metrics(self):
-        m = Metrics()
+    def init_metrics(self, *args, **kwargs):
+        m = Metrics(*args, **kwargs)
         for name, _ in self.named_datasets():
             m.Parent(name=name,
                 children=(m.AvgMetric(name='loss'),
@@ -39,10 +39,11 @@ class MNISTExperiment(EpochExperiment):
 
         eval_results = {}
         if 'eval' in mode:
-            self.train_mode(False)
-            pred = output.max(1, keepdim=True)[1]
-            correct = pred.eq(target.view_as(pred)).sum()
-            eval_results['acc'] = correct
+            with torch.no_grad():
+                self.train_mode(False)
+                pred = output.max(1, keepdim=True)[1]
+                correct = pred.eq(target.view_as(pred)).sum()
+                eval_results['acc'] = correct
 
         return {
             'loss': loss,

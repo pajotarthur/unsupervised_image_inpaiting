@@ -18,18 +18,13 @@ def size(batch):
 def to_device(batch, device):
     for key in batch:
         batch[key] = batch[key].to(device)
-        
+
 
 class BaseExperiment(object):
     def __init__(self, device='cuda:0', verbose=1):
         self.device = device
         self.verbose = verbose
 
-    def run(self, mode='train+eval'):
-        for epoch in range(1, self.nepochs + 1):
-            self.run_epoch(epoch)
-            print(self)
-    
     def update_state(self, epoch):
         return self.get_state()
 
@@ -100,22 +95,35 @@ class BaseExperiment(object):
 
 
 class EpochExperiment(BaseExperiment):
-    def __init__(self, nepochs=100, use_tqdm=True, niter='max', **kwargs):
+    def __init__(self, nepochs=100, use_tqdm=True, niter='max', mode='train+eval', **kwargs):
         super(EpochExperiment, self).__init__(**kwargs)
         self.nepochs = nepochs
         self.use_tqdm = use_tqdm
         self.niter = niter
+        self.mode = mode
 
-    def run(self, mode='train+eval'):
-        self.metrics = self.init_metrics()
+    def run(self, _run=None, mode='train+eval'):
+        self.metrics = self.init_metrics(_run)
         self.to_device()
         epochs = trange(1, self.nepochs + 1) if self.use_tqdm else range(1, self.nepochs)
         for epoch in epochs:
-            self.run_epoch(epoch)
+            self.run_epoch(epoch, self.mode, _run)
             self.metrics.reset()
 
-    def run_epoch(self, epoch):
+    def run_epoch(self, epoch, mode, _run=None):
         self.metrics.state.update(**self.update_state(epoch))
+
+        # attempt at making it generic
+        # for split, dataset in self.named_datasets():
+        #     dataset = tqdm(dataset) if self.use_tqdm else dataset
+        #     with torch.set_grad_enabled(('train' in mode) and (split == 'train')):
+        #         for batch in dataset:
+        #             to_device(batch, self.device)
+        #             mode = 'train+eval' if split=='train' else 'eval'
+        #             output = self(**batch, mode=mode)
+        #             self.metrics.dataset.update(**output, n=size(batch))
+        #             if self.use_tqdm:
+        #                 dataset.set_postfix_str(str(self.metrics.dataset))
 
         train = tqdm(self.train) if self.use_tqdm else self.train
         with torch.set_grad_enabled(True):
@@ -124,7 +132,8 @@ class EpochExperiment(BaseExperiment):
                 output = self(**batch, mode='train+eval')
                 self.metrics.train.update(**output, n=size(batch))
                 if self.use_tqdm:
-                    train.set_postfix_str(str(self.metrics.train))
+                    s = str(getattr(self.metrics, split))
+                    train.set_postfix_str(s)
 
         test = tqdm(self.test) if self.use_tqdm else self.test
         with torch.set_grad_enabled(False):
