@@ -28,9 +28,6 @@ class MNISTExperiment(EpochExperiment):
         )
         return m
 
-    def update_state(self,):
-        pass
-
     def __call__(self, input, target, train=True, evaluate=True):
         self.train_mode(train)
         output = self.model(input)
