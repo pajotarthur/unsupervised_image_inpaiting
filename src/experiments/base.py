@@ -117,8 +117,7 @@ class EpochExperiment(BaseExperiment):
         self.metrics = self.init_metrics(_run)
         self.to_device()
         range = trange if self.use_tqdm else range
-        epochs = range(1, self.nepochs + 1)
-        for epoch in epochs:
+        for epoch in range(1, self.nepochs + 1):
             self.run_epoch(epoch, self.train, self.evaluate, _run)
             self.metrics.state.update(**self.update_state(epoch))
             self.metrics.reset()
