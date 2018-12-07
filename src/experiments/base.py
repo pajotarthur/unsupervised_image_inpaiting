@@ -114,6 +114,7 @@ class EpochExperiment(BaseExperiment):
         self.niter = niter
 
     def run(self, _run=None):
+        epoch = 0
         print('peco', epoch)
         self.update_state(epoch)
         self.metrics = self.init_metrics(_run)
