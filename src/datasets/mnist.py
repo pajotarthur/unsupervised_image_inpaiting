@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import torch.utils.data as data
+from torchvision import transforms
 from PIL import Image
 import os
 import os.path

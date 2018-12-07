@@ -1,5 +1,4 @@
 from torch.utils.data import DataLoader
-from torchvision import transforms
 from functools import partial
 
 from .mnist import mnist
