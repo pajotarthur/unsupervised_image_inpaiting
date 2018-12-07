@@ -24,9 +24,6 @@ class BaseExperiment(object):
         self.evaluate = evaluate
 
     def update_state(self, epoch):
-        return self.get_state()
-
-    def get_state(self):
         return {}
 
     def train_mode(self, mode=True):
@@ -39,6 +36,7 @@ class BaseExperiment(object):
     def to_device(self):
         for m in self.modules():
             m.to(self.device)
+        return self
 
     def modules(self):
         for name, module in self.named_modules():
@@ -124,6 +122,8 @@ class EpochExperiment(BaseExperiment):
 
     def run_epoch(self, epoch, train=True, evaluate=True, _run=None):
         for split, dataset in self.named_datasets():
+            if (split == 'train') and not train:
+                continue
             dataset = tqdm(dataset) if self.use_tqdm else dataset
             with torch.set_grad_enabled(train and (split == 'trainset')):
                 metrics = getattr(self.metrics, split)

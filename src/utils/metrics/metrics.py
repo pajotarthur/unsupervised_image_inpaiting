@@ -6,7 +6,6 @@ from .metrics_ import TimeMetric_, AvgMetric_, SumMetric_, Parent_,\
 
 
 class Metrics(object):
-
     def __init__(self, name=None, time_indexing=True, xlabel=None):
         """ Create an experiment with the following parameters:
         - time_indexing (bool): use time to index values (otherwise counter)

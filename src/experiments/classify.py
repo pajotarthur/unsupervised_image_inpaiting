@@ -8,13 +8,20 @@ from .base import EpochExperiment
 
 class MNISTExperiment(EpochExperiment):
 
-    def __init__(self, model, optim, trainset=[], valset=[], testset=[], **kwargs):
+    def __init__(self, model, optim=None, lr_scheduler=None, trainset=[], valset=[], testset=[], **kwargs):
         super(MNISTExperiment, self).__init__(**kwargs)
         self.model = model
         self.train = trainset
         self.valset = valset
         self.testset = testset
         self.optim = optim
+
+    def update_state(self, epoch):
+        self.lr_scheduler.step()
+        lr = self.lr_scheduler.get_lr()
+        assert(len(lr) == 1)
+        lr = lr[0]
+        return {'lr': lr}
 
     def init_metrics(self, *args, **kwargs):
         m = Metrics(*args, **kwargs)
