@@ -129,11 +129,13 @@ class EpochExperiment(BaseExperiment):
             with torch.set_grad_enabled(train and (split == 'trainset')):
                 metrics = getattr(self.metrics, split)
                 for batch in dataset:
-                    for key in batch:
-                        batch[key] = batch[key].to(device)
                     if isinstance(batch, (tuple, list)):
+                        for i, v in enumerate(batch):
+                            batch[i] = v.to(device)
                         output = self(*batch, train=(split=='trainset'), evaluate=evaluate)
                     elif isinstance(batch, dict):
+                        for k, v in batch.items():
+                            batch[k] = v.to(device)
                         output = self(**batch, train=(split=='trainset'), evaluate=evaluate)
                     else:
                         raise Error('Unknown batch type {}'.format(type(batch)))
