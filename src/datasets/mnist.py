@@ -12,6 +12,18 @@ import codecs
 from .utils import download_url, makedir_exist_ok
 
 
+def mnist(fashion=False, *args, **kwargs):
+    transform = transforms.Compose([
+       transforms.ToTensor(),
+       transforms.Normalize((0.1307,), (0.3081,))
+    ])
+    if fashion:
+        cl = FashionMNIST
+    else:
+        cl = MNIST
+    return cl(transform=transform, *args, **kwargs)
+
+
 class MNIST(data.Dataset):
     """`MNIST <http://yann.lecun.com/exdb/mnist/>`_ Dataset.
 
@@ -78,7 +90,7 @@ class MNIST(data.Dataset):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        return {'input':img, 'target':target}
+        return img, target
 
     def __len__(self):
         return len(self.data)

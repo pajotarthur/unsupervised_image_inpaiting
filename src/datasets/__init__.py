@@ -2,27 +2,15 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 from functools import partial
 
-from .mnist import MNIST, FashionMNIST
+from .mnist import mnist
 
 
 def get_dataset_by_name(name):
     if name == 'mnist':
-        return partial(mnist, False)
+        return partial(mnist, fashion=False)
     elif name == 'fashion_mnist':
-        return partial(mnist, True)
+        return partial(mnist, fashion=True)
     raise NotImplementedError(name)
-
-
-def mnist(fashion=False, *args, **kwargs):
-    transform = transforms.Compose([
-       transforms.ToTensor(),
-       transforms.Normalize((0.1307,), (0.3081,))
-    ])
-    if fashion:
-        cl = FashionMNIST
-    else:
-        cl = MNIST
-    return cl(transform=transform, *args, **kwargs)
 
 
 def init_dataset(_name, batch_size, num_workers, drop_last, shuffle, **kwargs):

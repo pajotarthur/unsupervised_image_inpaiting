@@ -15,10 +15,6 @@ def size(batch):
     else:
         raise NotImplementedError
 
-def to_device(batch, device):
-    for key in batch:
-        batch[key] = batch[key].to(device)
-
 
 class BaseExperiment(object):
     def __init__(self, device='cuda:0', verbose=1, train=True, evaluate=True):
@@ -120,20 +116,27 @@ class EpochExperiment(BaseExperiment):
     def run(self, _run=None):
         self.metrics = self.init_metrics(_run)
         self.to_device()
-        epochs = trange(1, self.nepochs + 1) if self.use_tqdm else range(1, self.nepochs)
+        range = trange if self.use_tqdm else range
+        epochs = range(1, self.nepochs + 1)
         for epoch in epochs:
             self.run_epoch(epoch, self.train, self.evaluate, _run)
+            self.metrics.state.update(**self.update_state(epoch))
             self.metrics.reset()
 
     def run_epoch(self, epoch, train=True, evaluate=True, _run=None):
-        self.metrics.state.update(**self.update_state(epoch))
         for split, dataset in self.named_datasets():
             dataset = tqdm(dataset) if self.use_tqdm else dataset
-            with torch.set_grad_enabled(train and (split == 'train')):
+            with torch.set_grad_enabled(train and (split == 'trainset')):
                 metrics = getattr(self.metrics, split)
                 for batch in dataset:
-                    to_device(batch, self.device)
-                    output = self(**batch, train=(split=='train'), evaluate=evaluate)
+                    for key in batch:
+                        batch[key] = batch[key].to(device)
+                    if isinstance(batch, (tuple, list)):
+                        output = self(*batch, train=(split=='trainset'), evaluate=evaluate)
+                    elif isinstance(batch, dict):
+                        output = self(**batch, train=(split=='trainset'), evaluate=evaluate)
+                    else:
+                        raise Error('Unknown batch type {}'.format(type(batch)))
                     metrics.update(**output, n=size(batch))
                     if self.use_tqdm:
                         dataset.set_postfix_str(str(metrics))
