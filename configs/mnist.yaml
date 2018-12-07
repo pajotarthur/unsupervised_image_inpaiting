@@ -3,12 +3,12 @@ modules:
         _name: mnist_classifier
 
 datasets:
-    train:
+    trainset:
         _name: mnist
         train: True
         batch_size: &batch_size 22
 
-    test:
+    testset:
         _name: mnist
         train: False
         batch_size: *batch_size
