@@ -24,7 +24,7 @@ class BaseExperiment(object):
         self.evaluate = evaluate
 
     def update_state(self):
-        print('kjkj')
+        return self.get_state()
 
     def get_state(self):
         return {}
@@ -114,10 +114,6 @@ class EpochExperiment(BaseExperiment):
         self.niter = niter
 
     def run(self, _run=None):
-        epoch = 0
-        print('peco', epoch)
-        #import ipdb; ipdb.set_trace() # BREAKPOINT
-        self.update_state()
         self.metrics = self.init_metrics(_run)
         self.to_device()
         range = trange if self.use_tqdm else range
