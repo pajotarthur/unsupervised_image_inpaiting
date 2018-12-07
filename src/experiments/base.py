@@ -114,6 +114,8 @@ class EpochExperiment(BaseExperiment):
         self.niter = niter
 
     def run(self, _run=None):
+        print('peco', epoch)
+        self.update_state(epoch)
         self.metrics = self.init_metrics(_run)
         self.to_device()
         range = trange if self.use_tqdm else range
