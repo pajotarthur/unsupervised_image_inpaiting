@@ -117,14 +117,14 @@ class EpochExperiment(BaseExperiment):
         epoch = 0
         print('peco', epoch)
         #import ipdb; ipdb.set_trace() # BREAKPOINT
-        self.update_state(epoch)
+        self.update_state()
         self.metrics = self.init_metrics(_run)
         self.to_device()
         range = trange if self.use_tqdm else range
         for epoch in range(1, self.nepochs + 1):
             self.run_epoch(epoch, self.train, self.evaluate, _run)
             print(epoch)
-            self.metrics.state.update(**self.update_state(epoch))
+            self.metrics.state.update(**self.update_state())
             self.metrics.reset()
 
     def run_epoch(self, epoch, train=True, evaluate=True, _run=None):
