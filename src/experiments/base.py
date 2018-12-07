@@ -23,7 +23,7 @@ class BaseExperiment(object):
         self.train = train
         self.evaluate = evaluate
 
-    def update_state(self, epoch):
+    def update_state(self, epoch=None):
         return self.get_state()
 
     def get_state(self):
@@ -119,6 +119,7 @@ class EpochExperiment(BaseExperiment):
         range = trange if self.use_tqdm else range
         for epoch in range(1, self.nepochs + 1):
             self.run_epoch(epoch, self.train, self.evaluate, _run)
+            print(epoch)
             self.metrics.state.update(**self.update_state(epoch))
             self.metrics.reset()
 
