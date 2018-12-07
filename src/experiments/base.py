@@ -131,11 +131,11 @@ class EpochExperiment(BaseExperiment):
                 for batch in dataset:
                     if isinstance(batch, (tuple, list)):
                         for i, v in enumerate(batch):
-                            batch[i] = v.to(device)
+                            batch[i] = v.to(self.device)
                         output = self(*batch, train=(split=='trainset'), evaluate=evaluate)
                     elif isinstance(batch, dict):
                         for k, v in batch.items():
-                            batch[k] = v.to(device)
+                            batch[k] = v.to(self.device)
                         output = self(**batch, train=(split=='trainset'), evaluate=evaluate)
                     else:
                         raise Error('Unknown batch type {}'.format(type(batch)))
