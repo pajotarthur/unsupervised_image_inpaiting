@@ -23,8 +23,8 @@ class BaseExperiment(object):
         self.train = train
         self.evaluate = evaluate
 
-    def update_state(self, epoch):
-        print(epoch)
+    def update_state(self):
+        print('kjkj')
 
     def get_state(self):
         return {}
