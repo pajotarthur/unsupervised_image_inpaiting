@@ -15,12 +15,16 @@ class MNISTExperiment(EpochExperiment):
         self.valset = valset
         self.testset = testset
         self.optim = optim
+        self.lr_scheduler = lr_scheduler
 
     def update_state(self, epoch):
-        self.lr_scheduler.step()
-        lr = self.lr_scheduler.get_lr()
-        assert(len(lr) == 1)
-        lr = lr[0]
+        if self.lr_scheduler==None:
+            lr = self.optim.param_groups[-1]['lr']
+        else:
+            self.lr_scheduler.step()
+            lr = self.lr_scheduler.get_lr()
+            assert(len(lr) == 1)
+            lr = lr[0]
         return {'lr': lr}
 
     def init_metrics(self, *args, **kwargs):
