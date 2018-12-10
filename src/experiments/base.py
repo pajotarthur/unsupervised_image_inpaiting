@@ -29,7 +29,7 @@ class BaseExperiment(object):
     def train_mode(self, mode=True):
         for m in self.modules():
             m.train(mode)
-    
+
     def eval_mode(self):
         self.train_mode(mode=False)
 
@@ -91,8 +91,8 @@ class BaseExperiment(object):
             optimizers = self.__dict__['_optimizers']
             return optimizers[name]
         raise AttributeError("'{}' object has no attribute '{}'".format(
-            type(self).__name__, name))     
-    
+            type(self).__name__, name))
+
     def __delattr__(self, name):
         if name in self._modules:
             del self._modules[name]
@@ -114,8 +114,8 @@ class EpochExperiment(BaseExperiment):
     def run(self, _run=None):
         self.metrics = self.init_metrics(_run)
         self.to_device()
-        range = trange if self.use_tqdm else range
-        for epoch in range(1, self.nepochs + 1):
+        iterator = trange if self.use_tqdm else range
+        for epoch in iterator(1, self.nepochs + 1):
             self.run_epoch(epoch, self.train, self.evaluate, _run)
             self.metrics.state.update(**self.update_state(epoch))
             self.metrics.reset()
