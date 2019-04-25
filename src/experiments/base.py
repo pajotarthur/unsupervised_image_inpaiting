@@ -1,41 +1,35 @@
 from collections import OrderedDict
-from tqdm import tqdm, trange
-import torch
+
 from torch.nn import Module
-from torch.utils.data import DataLoader
 from torch.optim import Optimizer
+from torch.utils.data import DataLoader
 
-
-def size(batch):
-    if isinstance(batch, dict):
-        return batch[next(iter(batch))].shape[0]
-    elif isinstance(batch, tuple) or \
-        isinstance(batch, list):
-        return batch[0].shape[0]
-    else:
-        raise NotImplementedError
+from src.utils.misc import fix_seed
 
 
 class BaseExperiment(object):
-    def __init__(self, device='cuda:0', verbose=1, train=True, evaluate=True):
-        self.device = device
-        self.verbose = verbose
-        self.train = train
-        self.evaluate = evaluate
+    def __init__(self, seed=None, **kwargs):
+        self._modules = OrderedDict()
+        self._optimizers = OrderedDict()
+        self._datasets = OrderedDict()
 
-    def update_state(self, epoch):
-        return {}
+        if seed is not None:
+            fix_seed(seed)
 
-    def train_mode(self, mode=True):
+    def training(self, mode=True):
         for m in self.modules():
             m.train(mode)
 
-    def eval_mode(self):
-        self.train_mode(mode=False)
+    def evaluating(self):
+        self.training(mode=False)
 
-    def to_device(self):
+    def zero_grad(self):
+        for optim in self.optimizers():
+            optim.zero_grad()
+
+    def to(self, device):
         for m in self.modules():
-            m.to(self.device)
+            m.to(device)
         return self
 
     def modules(self):
@@ -64,16 +58,12 @@ class BaseExperiment(object):
 
     def __setattr__(self, name, value):
         if isinstance(value, Module):
-            if not hasattr(self, '_modules'):
-                self._modules = OrderedDict()
+            # this may be dangerous... or is it?
+            # self._modules[name] = value.to(self.device)
             self._modules[name] = value
         elif isinstance(value, DataLoader):
-            if not hasattr(self, '_datasets'):
-                self._datasets = OrderedDict()
             self._datasets[name] = value
         elif isinstance(value, Optimizer):
-            if not hasattr(self, '_optimizers'):
-                self._optimizers = OrderedDict()
             self._optimizers[name] = value
         else:
             object.__setattr__(self, name, value)
@@ -89,7 +79,8 @@ class BaseExperiment(object):
                 return datasets[name]
         if '_optimizers' in self.__dict__:
             optimizers = self.__dict__['_optimizers']
-            return optimizers[name]
+            if name in optimizers:
+                return optimizers[name]
         raise AttributeError("'{}' object has no attribute '{}'".format(
             type(self).__name__, name))
 
@@ -102,53 +93,3 @@ class BaseExperiment(object):
             del self._optimizers[name]
         else:
             object.__delattr__(self, name)
-
-
-class EpochExperiment(BaseExperiment):
-    def __init__(self, nepochs=100, use_tqdm=True, niter='max', **kwargs):
-        super(EpochExperiment, self).__init__(**kwargs)
-        self.nepochs = nepochs
-        self.use_tqdm = use_tqdm
-        self.niter = niter
-
-    def run(self, _run=None):
-        self.metrics = self.init_metrics(_run)
-        self.to_device()
-        iterator = trange if self.use_tqdm else range
-        for epoch in iterator(1, self.nepochs + 1):
-            self.run_epoch(epoch, self.train, self.evaluate, _run)
-            self.metrics.state.update(**self.update_state(epoch))
-            self.metrics.reset()
-
-    def run_epoch(self, epoch, train=True, evaluate=True, _run=None):
-        for split, dataset in self.named_datasets():
-            if (split == 'train') and not train:
-                continue
-            dataset = tqdm(dataset) if self.use_tqdm else dataset
-            with torch.set_grad_enabled(train and (split == 'trainset')):
-                metrics = getattr(self.metrics, split)
-                for batch in dataset:
-                    if isinstance(batch, (tuple, list)):
-                        for i, v in enumerate(batch):
-                            batch[i] = v.to(self.device)
-                        output = self(*batch, train=(split=='trainset'), evaluate=evaluate)
-                    elif isinstance(batch, dict):
-                        for k, v in batch.items():
-                            batch[k] = v.to(self.device)
-                        output = self(**batch, train=(split=='trainset'), evaluate=evaluate)
-                    else:
-                        raise Error('Unknown batch type {}'.format(type(batch)))
-                    metrics.update(**output, n=size(batch))
-                    if self.use_tqdm:
-                        dataset.set_postfix_str(str(metrics))
-
-    def __str__(self):
-        return str(self.metrics)
-        # s = ''
-        # if self.verbose > 0:
-        #     s += str(self.metrics.test)
-        # if self.verbose > 1:
-        #     s += str(self.metrics.train)
-        # if self.verbose > 2:
-        #     s += str(self.metrics.state)
-        # return s

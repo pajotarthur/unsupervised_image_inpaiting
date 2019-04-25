@@ -1,0 +1,63 @@
+datasets:
+  train:
+    _name:  &dataset_name celebA
+    train: train
+    batch_size: &train_batch_size 64
+    size: 3000
+    im_size: 64
+  #    root: &dataset_root /local/pajot/data/celeba-data
+  eval:
+    _name: *dataset_name
+    train: val
+    batch_size: 128
+    size: 1000
+    im_size: 64
+    shuffle: False
+#    root: *dataset_root
+
+experiment:
+  _name: gan_expe
+  nepoch: 10
+  nz: &nz 128
+  num_sample: 8
+  niter: 50
+  gan_mode: vanilla
+  split_D: True
+  root: /net/cluster/pajot/logs/test/
+  G_batch_size: *train_batch_size
+  writers:
+    - _name: sacred
+
+modules:
+  gen:
+    _name: dcgan_gen
+    input_nc: 3
+    ngf: 128
+    nz: *nz
+    init_name: orthogonal
+    init_gain: 0.02
+
+  dis:
+    _name: dcgan_dis
+    input_nc: 3
+    ndf: 128
+    init_name: orthogonal
+    init_gain: 0.02
+
+optimizers:
+  optim_gen:
+    _name: adam
+    _modules: gen
+    lr: 0.00004
+    betas:
+      - 0.0
+      - 0.99
+
+  optim_dis:
+    _name: adam
+    _modules: dis
+    lr: 0.00001
+    betas:
+      - 0.0
+      - 0.99
+

@@ -1,0 +1,43 @@
+_common: &common
+  batch_size: 16
+  num_workers: 4
+  shuffle: True
+  drop_last: True
+  size: all
+  train: True
+  pin_memory: True
+
+recipe:
+  <<: *common
+  root: /net/drunk/pajot/data/recipe_dir/recipe/
+  im_size: 64
+
+lsun:
+  <<: *common
+  root: /net/chic/pajot/data/lsun/
+  im_size: 64
+
+celebA:
+  <<: *common
+  root: /local/pajot/data/CelebA_nocrop/images
+  im_size: 64
+
+mcelebA:
+  <<: *common
+  root: /local/pajot/data/celeba-data/
+  im_size: 64
+
+ffhq:
+  <<: *common
+  root: /local/pajot/data/thumbnails128x128
+  im_size: 128
+
+imagenet_tiny:
+  <<: *common
+  root: "/local/pajot/data/tiny-imagenet-200/"
+  im_size: 64
+
+imagenet:
+  <<: *common
+  root: "/local/common-data/imagenet_2012/images"
+  im_size: 64

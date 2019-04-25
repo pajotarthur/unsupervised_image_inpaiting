@@ -1,16 +1,18 @@
 """copied from https://github.com/pytorch/vision/blob/master/torchvision/datasets/mnist.py"""
 
 from __future__ import print_function
-import torch.utils.data as data
-from torchvision import transforms
-from PIL import Image
+
+import codecs
+import gzip
 import os
 import os.path
-import gzip
+
 import numpy as np
 import torch
-import codecs
-from .utils import download_url, makedir_exist_ok
+import torch.utils.data as data
+from PIL import Image
+from src.datasets.utils import download_url, makedir_exist_ok
+from torchvision import transforms
 
 
 def mnist(fashion=False, *args, **kwargs):

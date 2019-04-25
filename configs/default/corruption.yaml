@@ -1,0 +1,16 @@
+remove_pix:
+    percent: 0.70
+
+remove_pix_dark:
+    percent: 0.90
+
+keep_patch:
+    size_percent: [0.5, 0.5]
+
+conv_noise:
+    conv_size: 5
+    noise_variance: 0.1
+
+vertical_bar:
+    width_ratio: [0.1, 0.5]
+    max_speed: 0.1

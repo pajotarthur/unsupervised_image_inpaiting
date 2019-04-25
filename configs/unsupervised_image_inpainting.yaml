@@ -1,0 +1,79 @@
+corruption:
+  _name: remove_pix_dark
+  percent:  0.50
+
+
+
+datasets:
+  train:
+    _name:  &dataset_name celebA
+    train: train
+    batch_size: &train_batch_size 64
+    size: 80000
+    im_size: 64
+  #    root: &dataset_root /local/pajot/data/celeba-data
+  eval:
+    _name: *dataset_name
+    train: val
+    batch_size: 128
+    size: 1000
+    im_size: 64
+    shuffle: False
+#    root: *dataset_root
+
+experiment:
+  _name: unsup_image_inpainting
+  nepoch: 10
+  nz: &nz 16
+  lambda_L1: 1
+  lambda_z: 1
+  num_sample: 8
+  niter: 50
+  gan_mode: hinge
+  root: /net/cluster/pajot/logs/test/
+  G_batch_size: *train_batch_size
+  writers:
+    - _name: sacred
+
+modules:
+  gen:
+    _name: pix2pix
+    input_nc: 3
+    ngf: 16
+    nz: *nz
+    init_name: orthogonal
+    init_gain: 0.02
+
+  dis:
+    _name: biggan_dis
+    input_nc: 3
+    ndf: 16
+    init_name: orthogonal
+    init_gain: 1.41
+
+  enc:
+    _name: biggan_dis
+    input_nc: 3
+    ndf: 16
+    output_dim: *nz
+    init_name: orthogonal
+    init_gain: 1.41
+
+
+optimizers:
+  optim_gen:
+    _name: adam
+    _modules: gen
+    lr: 0.00004
+    betas:
+      - 0.0
+      - 0.99
+
+  optim_dis:
+    _name: adam
+    _modules: dis
+    lr: 0.00001
+    betas:
+      - 0.0
+      - 0.99
+

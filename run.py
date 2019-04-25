@@ -1,16 +1,22 @@
-from src.experiments import init_experiment
 from src.datasets import init_dataset
+from src.experiments import init_experiment
 from src.modules import init_module
 from src.optimizers import init_optimizer
-from src.utils.run import sacred_run
+from src.utils.sacred import sacred_run
+from src.corruptions import init_corruption
 
 
-def init_and_run(experiment, modules, datasets, optimizers, _run=None):
+def init_and_run(experiment, modules, datasets, optimizers, _run, _log, _seed, corruption=None):
+
+    if corruption is not None:
+        corr = init_corruption(**corruption)
+    else:
+        corr = None
 
     # initializing datasets
     dsets = {}
     for dataset_name, dataset_config in datasets.items():
-        dsets[dataset_name] = init_dataset(**dataset_config)
+        dsets[dataset_name] = init_dataset(corruption=corr, **dataset_config)
 
     # initializing modules
     mods = {}
@@ -23,8 +29,10 @@ def init_and_run(experiment, modules, datasets, optimizers, _run=None):
         optims[optimizer_name] = init_optimizer(mods, **optimizer_config)
 
     # initializing experiment and running it
-    init_experiment(**mods, **dsets, **optims, **experiment).run(_run)
+    init_experiment(sacred_run=_run, seed=_seed, corruption=corr,
+                    **dsets, **mods, **optims,
+                    **experiment).run()
 
 
 if __name__ == '__main__':
-    sacred_run(init_and_run, name='testing!')
+    sacred_run(init_and_run)
